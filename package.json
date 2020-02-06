@@ -1,15 +1,13 @@
 {
   "name": "stormfly",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "A BabylonJS project",
   "scripts": {
     "start": "webpack-dev-server --config config/dev.js",
     "build": "node scripts/build.js && webpack -p --config config/dev.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["babylonjs", "webpack", "metaverse"],
+  "author": "Debojyoti Ghosh",
   "devDependencies": {
     "@babel/core": "^7.8.4",
     "@babel/preset-env": "^7.8.4",
