@@ -1,5 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
 const sourceDirectory = path.resolve(__dirname, '../src')
 const buildDirectory = path.resolve(__dirname, '../build')
@@ -55,7 +56,10 @@ const config = {
       title: 'The Phaser App',
       template: sourceDirectory + '/index.html',
       filename: 'index.html' // relative to root of the application
-    })
+    }),
+    new CopyPlugin([
+      { from: sourceDirectory + '/assets', to: publicDirectory + '/assets' }
+    ])
   ],
 
   optimization: {
