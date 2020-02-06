@@ -1,5 +1,4 @@
 const path = require('path')
-const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const sourceDirectory = path.resolve(__dirname, '../src')
@@ -25,6 +24,11 @@ const config = {
             presets: ['@babel/preset-env']
           }
         }
+      },
+      {
+        test: /\.css$/,
+        include: sourceDirectory,
+        use: ['style-loader', 'css-loader']
       }
     ]
   },
@@ -33,6 +37,7 @@ const config = {
     extensions: ['.js'],
     alias: {
       assets: path.resolve(sourceDirectory, 'assets'),
+      stylesheets: path.resolve(sourceDirectory, 'stylesheets'),
       constants: path.resolve(sourceDirectory, 'constants'),
       prefabs: path.resolve(sourceDirectory, 'prefabs'),
       scenes: path.resolve(sourceDirectory, 'scenes')
