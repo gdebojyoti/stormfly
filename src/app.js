@@ -11,7 +11,7 @@ import '@babylonjs/core/Materials/standardMaterial' // allow standard material t
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
 import '@babylonjs/loaders/OBJ' // OBJ loader
 import '@babylonjs/loaders/gLTF' // OBJ loader
-// import '@babylonjs/core/Loading/loadingScreen' // LoadingScreen needed by SceneLoader.ImportMesh
+import '@babylonjs/core/Loading/loadingScreen' // LoadingScreen needed by SceneLoader.Append & ImportMesh
 
 import 'stylesheets/main.css'
 
@@ -32,20 +32,20 @@ sphere.position.y = 2
 
 Mesh.CreateGround('ground1', 6, 6, 2, scene) // Params: name, width, depth, subdivs, scene
 
-SceneLoader.LoadAssetContainer('assets/', 'boombox.glb', scene, (container) => {
+SceneLoader.Append('assets/', 'boombox.glb', scene, (container) => {
   console.log('boombox container', container)
 })
-SceneLoader.LoadAssetContainer('assets/', 'lego.obj', scene, (container) => {
-  console.log('lego container', container)
-})
+// SceneLoader.LoadAssetContainer('assets/', 'lego.obj', scene, (container) => {
+//   console.log('lego container', container)
+// })
 
-// SceneLoader.ImportMesh(
-//   null,
-//   'assets/',
-//   'lego.obj',
-//   scene,
-//   (meshes) => console.log('loaded', meshes)
-// )
+SceneLoader.ImportMesh(
+  null,
+  'assets/',
+  'lego.obj',
+  scene,
+  (meshes) => console.log('lego model loaded', meshes)
+)
 
 engine.runRenderLoop(() => {
   scene.render()
