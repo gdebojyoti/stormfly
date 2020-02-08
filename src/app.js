@@ -1,9 +1,10 @@
 import { Engine } from '@babylonjs/core/Engines/engine'
 import { Scene } from '@babylonjs/core/scene'
-import { Vector3 } from '@babylonjs/core/Maths/math'
+import { Vector3, Axis } from '@babylonjs/core/Maths/math'
 // import { FreeCamera } from '@babylonjs/core/Cameras/freeCamera'
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
-import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
+// import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
+import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader'
 
@@ -24,29 +25,46 @@ const camera = new ArcRotateCamera('camera1', 0, 0.8, 10, new Vector3(0, 5, -15)
 camera.setTarget(Vector3.Zero()) // target camera towards scene origin
 camera.attachControl(canvas, true) // attach camera to canvas
 
-const light = new HemisphericLight('light1', new Vector3(0, 1, 0), scene)
-light.intensity = 0.7
+const light = new DirectionalLight('light1', new Vector3(-1, -1, 0), scene)
+// light.intensity = 0.6
+window.light = light
 
-const sphere = Mesh.CreateSphere('sphere1', 16, 2, scene) // Params: name, subdivs, size, scene
+const sphere = Mesh.CreateSphere('sphere1', 16, 1, scene) // Params: name, subdivs, size, scene
 sphere.position.y = 2
 
 Mesh.CreateGround('ground1', 6, 6, 2, scene) // Params: name, width, depth, subdivs, scene
 
-SceneLoader.Append('assets/', 'boombox.glb', scene, (container) => {
-  console.log('boombox container', container)
-})
-// SceneLoader.LoadAssetContainer('assets/', 'lego.obj', scene, (container) => {
-//   console.log('lego container', container)
-// })
+const legoModel = new Mesh('lego', scene) // empty game object
+const treeModel = new Mesh('tree', scene) // empty game object
 
 SceneLoader.ImportMesh(
   null,
-  'assets/',
+  'assets/dump/',
   'lego.obj',
   scene,
-  (meshes) => console.log('lego model loaded', meshes)
+  (meshes) => {
+    console.log('lego model loaded', meshes)
+
+    // TODO: find a better way of assigning parent to an imported model
+    meshes.forEach(mesh => { mesh.setParent(legoModel) })
+    legoModel.scaling = new Vector3(0.05, 0.05, 0.05)
+  }
+)
+
+SceneLoader.ImportMesh(
+  null,
+  'assets/models/',
+  'TreePine1.glb',
+  scene,
+  (meshes) => {
+    // TODO: find a better way of assigning parent to an imported model
+    meshes.forEach(mesh => { mesh.setParent(treeModel) })
+    treeModel.position.x = -5
+  }
 )
 
 engine.runRenderLoop(() => {
   scene.render()
+  legoModel.rotate(Axis.Y, Math.PI / 150)
+  treeModel.rotate(Axis.Y, -Math.PI / 150)
 })

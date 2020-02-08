@@ -63,6 +63,7 @@ const config = {
   ],
 
   optimization: {
+    minimize: false,
     splitChunks: {
       cacheGroups: {
         vendors: {
