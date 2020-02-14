@@ -1,1 +1,3 @@
-console.log("hola!")
+import Game from 'components/Game'
+
+Game.initialize()

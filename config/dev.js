@@ -1,6 +1,6 @@
 const path = require('path')
-const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
 const sourceDirectory = path.resolve(__dirname, '../src')
 const buildDirectory = path.resolve(__dirname, '../build')
@@ -25,6 +25,11 @@ const config = {
             presets: ['@babel/preset-env']
           }
         }
+      },
+      {
+        test: /\.css$/,
+        include: sourceDirectory,
+        use: ['style-loader', 'css-loader']
       }
     ]
   },
@@ -33,9 +38,9 @@ const config = {
     extensions: ['.js'],
     alias: {
       assets: path.resolve(sourceDirectory, 'assets'),
-      constants: path.resolve(sourceDirectory, 'constants'),
-      prefabs: path.resolve(sourceDirectory, 'prefabs'),
-      scenes: path.resolve(sourceDirectory, 'scenes')
+      stylesheets: path.resolve(sourceDirectory, 'stylesheets'),
+      components: path.resolve(sourceDirectory, 'components'),
+      utilities: path.resolve(sourceDirectory, 'utilities')
     }
   },
 
@@ -50,10 +55,14 @@ const config = {
       title: 'The Phaser App',
       template: sourceDirectory + '/index.html',
       filename: 'index.html' // relative to root of the application
-    })
+    }),
+    new CopyPlugin([
+      { from: sourceDirectory + '/assets', to: publicDirectory + '/assets' }
+    ])
   ],
 
   optimization: {
+    minimize: false,
     splitChunks: {
       cacheGroups: {
         vendors: {

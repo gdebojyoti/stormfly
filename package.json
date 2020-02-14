@@ -3,21 +3,31 @@
   "version": "0.1.0",
   "description": "A BabylonJS project",
   "scripts": {
+    "test": "standard",
     "start": "webpack-dev-server --config config/dev.js",
     "build": "node scripts/build.js && webpack -p --config config/dev.js"
   },
-  "keywords": ["babylonjs", "webpack", "metaverse"],
+  "keywords": [
+    "babylonjs",
+    "webpack",
+    "metaverse"
+  ],
   "author": "Debojyoti Ghosh",
   "devDependencies": {
     "@babel/core": "^7.8.4",
     "@babel/preset-env": "^7.8.4",
     "babel-loader": "^8.0.6",
+    "copy-webpack-plugin": "^5.1.1",
+    "css-loader": "^3.4.2",
     "html-webpack-plugin": "^3.2.0",
+    "standard": "^14.3.1",
+    "style-loader": "^1.1.3",
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
-    "babylonjs": "^4.0.3"
+    "@babylonjs/core": "^4.0.3",
+    "@babylonjs/loaders": "^4.0.3"
   }
 }
