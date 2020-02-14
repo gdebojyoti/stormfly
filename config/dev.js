@@ -39,9 +39,8 @@ const config = {
     alias: {
       assets: path.resolve(sourceDirectory, 'assets'),
       stylesheets: path.resolve(sourceDirectory, 'stylesheets'),
-      constants: path.resolve(sourceDirectory, 'constants'),
-      prefabs: path.resolve(sourceDirectory, 'prefabs'),
-      scenes: path.resolve(sourceDirectory, 'scenes')
+      components: path.resolve(sourceDirectory, 'components'),
+      utilities: path.resolve(sourceDirectory, 'utilities')
     }
   },
 
