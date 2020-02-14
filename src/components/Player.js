@@ -1,11 +1,12 @@
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader'
-import { Vector3 } from '@babylonjs/core/Maths/math'
+import { Vector3, Space } from '@babylonjs/core/Maths/math'
 
-import '@babylonjs/loaders/gLTF' // OBJ loader
+import '@babylonjs/loaders/glTF' // OBJ loader
 
 import Controls from 'utilities/Controls'
 
 const DEFAULT_ANIMATION = 'idle'
+const WALK_SPEED = 0.05
 
 class Player {
   constructor (scene, canvas) {
@@ -23,6 +24,9 @@ class Player {
       strafeLeft: null,
       strafeRight: null
     }
+    this.mesh = null // main mesh for 3d model; used to affect movement
+    this.dirX = 0 // horizontal direction (along X axis)
+    this.dirY = 0 // vertical direction (along Z axis)
 
     this.importAsset(scene)
     this.addControls(canvas)
@@ -35,8 +39,8 @@ class Player {
       'vincent.glb',
       scene,
       (meshes, particleSystems, skeletons, animationGroups) => {
-        const player = meshes[0]
-        player.position = new Vector3(0, 2, 0)
+        this.mesh = meshes[0]
+        this.mesh.position = new Vector3(0, 2, 0)
 
         animationGroups[0].stop() // stop default animation
 
@@ -62,16 +66,31 @@ class Player {
   addControls (canvas) {
     Controls.addListener('keydown', {
       up: () => {
-        this.isWalking = true
+        this.dirY = 1
       },
       down: () => {
-        console.log('Pressing S')
+        this.dirY = -1
+      },
+      left: () => {
+        this.dirX = -1
+      },
+      right: () => {
+        this.dirX = 1
       }
     })
 
     Controls.addListener('keyup', {
       up: () => {
-        this.isWalking = false
+        this.dirY = 0
+      },
+      down: () => {
+        this.dirY = 0
+      },
+      left: () => {
+        this.dirX = 0
+      },
+      right: () => {
+        this.dirX = 0
       }
     })
   }
@@ -79,8 +98,9 @@ class Player {
   // this method runs every frame
   update () {
     let anim = DEFAULT_ANIMATION
-    if (this.isWalking) {
+    if (this.dirX || this.dirY) {
       anim = 'run'
+      this.movePlayer()
     }
 
     // exit if current animation remains unchanged
@@ -96,6 +116,11 @@ class Player {
       // play current animation; stop other animations
       this.toggleAnimation(key, { isPlaying: key === anim })
     })
+  }
+
+  movePlayer () {
+    this.mesh.translate(new Vector3(this.dirX, 0, this.dirY).normalize(), WALK_SPEED, Space.WORLD)
+    this.mesh.rotation = new Vector3(0, Math.atan2(this.dirY, -this.dirX) + Math.PI / 2, 0)
   }
 }
 

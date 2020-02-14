@@ -1,5 +1,6 @@
 import { Engine } from '@babylonjs/core/Engines/engine'
 import { Scene } from '@babylonjs/core/scene'
+// import { DebugLayer } from '@babylonjs/core/Debug/debugLayer'
 import { Vector3, Color3 } from '@babylonjs/core/Maths/math'
 import { FreeCamera } from '@babylonjs/core/Cameras/freeCamera'
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
@@ -10,6 +11,7 @@ import Player from './Player'
 // import SceneAssets from './Scene'
 
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
+import '@babylonjs/inspector'
 
 import 'stylesheets/main.css'
 
@@ -22,6 +24,8 @@ class Game {
     const self = new Game()
 
     self.scene = new Scene(engine)
+    // new DebugLayer(self.scene).show()
+
     self.gameObjects = {}
 
     self.initializeCamera(canvas)
@@ -33,7 +37,7 @@ class Game {
   }
 
   initializeCamera (canvas) {
-    this.camera = new FreeCamera('camera1', new Vector3(0, 5, -15), this.scene)
+    this.camera = new FreeCamera('camera1', new Vector3(0, 15, -5), this.scene)
     this.camera.setTarget(Vector3.Zero()) // target camera towards scene origin
     this.camera.attachControl(canvas, true) // attach camera to canvas
   }
@@ -46,12 +50,15 @@ class Game {
 
   initializeBasicAssets () {
     const material = new StandardMaterial()
+    material.name = 'My custom material'
     material.diffuseColor = new Color3(1, 0.9, 0.7)
 
     const sphere = Mesh.CreateSphere('sphere1', 16, 1) // Params: name, subdivs, size, scene
     sphere.position.y = 2
+    sphere.outlineColor = Color3.Red()
+    sphere.renderOutline = true
 
-    const ground = Mesh.CreateGround('ground1', 6, 6, 2) // Params: name, width, depth, subdivs, scene
+    const ground = Mesh.CreateGround('ground1', 16, 16, 2) // Params: name, width, depth, subdivs, scene
     ground.material = material
   }
 
