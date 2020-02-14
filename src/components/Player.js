@@ -80,7 +80,7 @@ class Player {
   update () {
     let anim = DEFAULT_ANIMATION
     if (this.isWalking) {
-      anim = 'walk'
+      anim = 'run'
     }
 
     // exit if current animation remains unchanged
@@ -91,6 +91,7 @@ class Player {
     // update current animation
     this.currentAnimation = anim
 
+    // TODO: Blend animations to create a more seamless experience
     Object.keys(this.animations).forEach(key => {
       // play current animation; stop other animations
       this.toggleAnimation(key, { isPlaying: key === anim })

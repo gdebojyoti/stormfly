@@ -7,7 +7,7 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 
 import Player from './Player'
-import SceneAssets from './Scene'
+// import SceneAssets from './Scene'
 
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
 
@@ -60,7 +60,7 @@ class Game {
   }
 
   addMoreAssets () {
-    SceneAssets.addDemoTrees(this.scene)
+    // SceneAssets.addDemoTrees(this.scene)
   }
 
   update (engine) {
@@ -68,7 +68,7 @@ class Game {
       this.player.update()
       this.scene.render()
 
-      SceneAssets.update()
+      // SceneAssets.update()
     })
   }
 }
