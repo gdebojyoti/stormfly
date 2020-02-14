@@ -1,3 +1,11 @@
-.DS_Store
 node_modules
+
+# macos
+.DS_Store
+
+# generated files
 public
+build
+
+# test 3d models
+.fbx
