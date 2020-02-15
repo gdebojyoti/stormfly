@@ -10,6 +10,7 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
 import '@babylonjs/inspector'
 
+import Messenger from './Messenger'
 import Player from './Player'
 // import SceneAssets from './Scene'
 import { getSearchParam } from 'utilities'
@@ -37,11 +38,12 @@ class Game {
     self.initializeBasicAssets()
     self.addPlayers(canvas)
     self.addMoreAssets()
+    self.subscribeToMessages()
     self.update(engine)
   }
 
   initializeCamera (canvas) {
-    this.camera = new FreeCamera('camera1', new Vector3(0, 15, -5), this.scene)
+    this.camera = new FreeCamera('camera1', new Vector3(0, 2, -5), this.scene)
     this.camera.setTarget(Vector3.Zero()) // target camera towards scene origin
     this.camera.attachControl(canvas, true) // attach camera to canvas
   }
@@ -57,21 +59,34 @@ class Game {
     material.name = 'My custom material'
     material.diffuseColor = new Color3(1, 0.9, 0.7)
 
-    const sphere = Mesh.CreateSphere('sphere1', 16, 1) // Params: name, subdivs, size, scene
-    sphere.position.y = 2
-    sphere.outlineColor = Color3.Red()
-    sphere.renderOutline = true
+    this.sphere = Mesh.CreateSphere('sphere1', 16, 1) // Params: name, subdivs, size (diameter), scene
+    this.sphere.position.y = 0.5
+    this.sphere.renderOutline = true
 
     const ground = Mesh.CreateGround('ground1', 16, 16, 2) // Params: name, width, depth, subdivs, scene
     ground.material = material
   }
 
   addPlayers (canvas) {
-    this.player = new Player(this.scene, canvas)
+    this.player = new Player(this.scene, { canvas, colliders: [this.sphere] })
   }
 
   addMoreAssets () {
     // SceneAssets.addDemoTrees(this.scene)
+  }
+
+  subscribeToMessages () {
+    const messages = ['PLAYER_LOADED']
+    messages.forEach(message => { Messenger.subscribe(message, data => this.listenToMessages(message, data)) })
+  }
+
+  listenToMessages (message, data) {
+    switch (message) {
+      case 'PLAYER_LOADED': {
+        console.log('player model has loaded...', data)
+        break
+      }
+    }
   }
 
   update (engine) {

@@ -4,16 +4,17 @@ import { Vector3, Space } from '@babylonjs/core/Maths/math'
 import '@babylonjs/loaders/glTF' // OBJ loader
 
 import Controls from 'utilities/Controls'
+import Messenger from './Messenger'
 
 const DEFAULT_ANIMATION = 'idle'
 const WALK_SPEED = 0.05
 
 class Player {
-  constructor (scene, canvas) {
-    this.initialize(scene, canvas)
+  constructor (scene, data) {
+    this.initialize(scene, data)
   }
 
-  initialize (scene, canvas) {
+  initialize (scene, { canvas, colliders = [] } = {}) {
     this.isWalking = false // player is idle by default
     this.currentAnimation = DEFAULT_ANIMATION
     this.animations = {
@@ -27,6 +28,7 @@ class Player {
     this.mesh = null // main mesh for 3d model; used to affect movement
     this.dirX = 0 // horizontal direction (along X axis)
     this.dirY = 0 // vertical direction (along Z axis)
+    this.colliders = colliders // array of objects with which the player can collide
 
     this.importAsset(scene)
     this.addControls(canvas)
@@ -40,12 +42,14 @@ class Player {
       scene,
       (meshes, particleSystems, skeletons, animationGroups) => {
         this.mesh = meshes[0]
-        this.mesh.position = new Vector3(0, 2, 0)
+        this.mesh.position = new Vector3(0, 0, 0)
 
         animationGroups[0].stop() // stop default animation
 
         this.assignAnimations(animationGroups)
         this.toggleAnimation(this.currentAnimation)
+
+        Messenger.publish('PLAYER_LOADED', this.mesh)
       }
     )
   }
@@ -97,6 +101,9 @@ class Player {
 
   // this method runs every frame
   update () {
+    const checkForCollisions = this.checkForCollisions()
+    console.log('checkForCollisions', checkForCollisions)
+
     let anim = DEFAULT_ANIMATION
     if (this.dirX || this.dirY) {
       anim = 'run'
@@ -116,6 +123,23 @@ class Player {
       // play current animation; stop other animations
       this.toggleAnimation(key, { isPlaying: key === anim })
     })
+  }
+
+  checkForCollisions () {
+    // return false if model hasn't been loaded yet
+    if (!this.mesh) {
+      return false
+    }
+
+    let didCollide = false
+
+    this.colliders.forEach(collider => {
+      if (this.mesh.intersectsMesh(collider)) {
+        didCollide = true
+      }
+    })
+
+    return didCollide
   }
 
   movePlayer () {
