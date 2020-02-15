@@ -152,15 +152,7 @@ class Player {
       return false
     }
 
-    let didCollide = false
-
-    this.colliders.forEach(collider => {
-      if (this.mesh.intersectsMesh(collider)) {
-        didCollide = true
-      }
-    })
-
-    return didCollide
+    return this.colliders.some(collider => this.mesh.intersectsMesh(collider))
   }
 
   movePlayer () {
