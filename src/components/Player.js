@@ -107,8 +107,9 @@ class Player {
 
   // this method runs every frame
   update () {
-    const checkForCollisions = this.checkForCollisions()
-    console.log('checkForCollisions', checkForCollisions)
+    // // do stuff if colliding
+    // const checkForCollisions = this.checkForCollisions()
+    // console.log('checkForCollisions', checkForCollisions)
 
     let anim = DEFAULT_ANIMATION
     if (this.dirX || this.dirY) {

@@ -37,8 +37,8 @@ class Game {
 
     self.gameObjects = {}
 
-    self.initializeScene()
     self.initializeCamera(canvas)
+    self.initializeScene()
     self.initializeLights()
     const basicAssets = self.initializeBasicAssets()
     self.addPlayers(canvas, basicAssets)
@@ -50,6 +50,7 @@ class Game {
   initializeScene () {
     const gravityVector = new Vector3(0, -9.81, 0)
     this.scene.enablePhysics(gravityVector)
+    SceneAssets.initialize(this.scene, this.camera)
   }
 
   initializeCamera (canvas) {
@@ -68,13 +69,17 @@ class Game {
     const material = new StandardMaterial()
     material.name = 'My custom material'
     material.diffuseColor = new Color3(1, 0.9, 0.7)
-    // material.wireframe = true
+    material.specularColor = new Color3(0, 0, 0)
+
+    // center of map
+    Mesh.CreateSphere('center', 3, 0.1)
 
     // cube1 will trigger collided flag
     const cube1 = Mesh.CreateBox('cube1')
     cube1.name = 'Entry point'
     cube1.position = new Vector3(0, 0.5, -2)
     cube1.material = material
+    cube1.enableEdgesRendering(10)
 
     // player cannot walk through cube2
     const cube2 = Mesh.CreateBox('cube2') // Params: name, subdivs, size (diameter), scene
@@ -117,10 +122,17 @@ class Game {
     }
   }
 
+  mapCenterToScreen () {
+    const { x, y } = SceneAssets.mapPointToScreen() || {}
+    console.log('Screen coordinates of map center', x, y)
+  }
+
   update (engine) {
     engine.runRenderLoop(() => {
       this.player.update()
       this.scene.render()
+
+      // this.mapCenterToScreen()
 
       SceneAssets.update()
     })

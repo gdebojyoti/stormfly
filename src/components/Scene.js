@@ -1,11 +1,36 @@
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader'
-import { Axis } from '@babylonjs/core/Maths/math'
+import { Vector3, Matrix, Axis } from '@babylonjs/core/Maths/math'
 
 const total = 360
 let counter = 0 // to keep track of number of trees loaded
 
 class Scene {
+  // set basic info
+  static initialize (scene, camera) {
+    this.scene = scene
+    this.camera = camera
+  }
+
+  // world coordinates to screen coordinates
+  static mapPointToScreen (point = new Vector3(0, 0, 0)) {
+    if (!this.camera) {
+      return null
+    }
+    const { x, y } = Vector3.Project(
+      point,
+      Matrix.Identity(),
+      this.scene.getTransformMatrix(),
+      this.camera.viewport
+    )
+
+    return {
+      x: Math.floor(window.innerWidth * x),
+      y: Math.floor(window.innerHeight * y)
+    }
+  }
+
+  // add 120 instances each of 3 different tree models
   static addDemoTrees (scene) {
     const assets = {
       trees: new Array(total / 3).fill(['TreePine1.glb', 'TreePine2.glb', 'TreePine3.glb']).flat()
@@ -49,6 +74,7 @@ class Scene {
     })
   }
 
+  // rotate demo trees
   static update () {
     // exit unless all trees have been loaded
     if (counter !== total) {
