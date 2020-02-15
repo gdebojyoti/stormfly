@@ -1,17 +1,18 @@
 import { Engine } from '@babylonjs/core/Engines/engine'
 import { Scene } from '@babylonjs/core/scene'
-// import { DebugLayer } from '@babylonjs/core/Debug/debugLayer'
+import { DebugLayer } from '@babylonjs/core/Debug/debugLayer'
 import { Vector3, Color3 } from '@babylonjs/core/Maths/math'
 import { FreeCamera } from '@babylonjs/core/Cameras/freeCamera'
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 
-import Player from './Player'
-// import SceneAssets from './Scene'
-
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
 import '@babylonjs/inspector'
+
+import Player from './Player'
+// import SceneAssets from './Scene'
+import { getSearchParam } from 'utilities'
 
 import 'stylesheets/main.css'
 
@@ -24,7 +25,10 @@ class Game {
     const self = new Game()
 
     self.scene = new Scene(engine)
-    // new DebugLayer(self.scene).show()
+
+    // debugging enabled when URL contains 'debug=true'
+    const debugLayer = new DebugLayer(self.scene)
+    getSearchParam('debug') ? debugLayer.show() : debugLayer.hide()
 
     self.gameObjects = {}
 
