@@ -1,5 +1,5 @@
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader'
-import { Vector3, Space } from '@babylonjs/core/Maths/math'
+import { Vector3 } from '@babylonjs/core/Maths/math'
 
 import '@babylonjs/loaders/glTF' // OBJ loader
 
@@ -7,7 +7,7 @@ import Controls from 'utilities/Controls'
 import Messenger from './Messenger'
 
 const DEFAULT_ANIMATION = 'idle'
-const WALK_SPEED = 0.05
+const WALK_SPEED_FACTOR = 0.05
 
 class Player {
   constructor (scene, data) {
@@ -40,18 +40,23 @@ class Player {
       'assets/models/',
       'vincent.glb',
       scene,
-      (meshes, particleSystems, skeletons, animationGroups) => {
-        this.mesh = meshes[0]
-        this.mesh.position = new Vector3(0, 0, 0)
-
-        animationGroups[0].stop() // stop default animation
-
-        this.assignAnimations(animationGroups)
-        this.toggleAnimation(this.currentAnimation)
-
-        Messenger.publish('PLAYER_LOADED', this.mesh)
-      }
+      this.onImportSuccess.bind(this)
     )
+  }
+
+  onImportSuccess (meshes, particleSystems, skeletons, animationGroups) {
+    this.mesh = meshes[0]
+    this.mesh.position = new Vector3(0, 5, 0)
+
+    animationGroups[0].stop() // stop default animation
+
+    this.assignAnimations(animationGroups)
+    this.toggleAnimation(this.currentAnimation)
+
+    // TODO: more accurate dimensions needed
+    this.mesh.ellipsoid = new Vector3(0.5, 0.5, 0.5)
+
+    Messenger.publish('PLAYER_LOADED', this.mesh)
   }
 
   assignAnimations (animationGroups) {
@@ -108,6 +113,8 @@ class Player {
     if (this.dirX || this.dirY) {
       anim = 'run'
       this.movePlayer()
+    } else {
+      this.fallFromGravity()
     }
 
     // exit if current animation remains unchanged
@@ -123,6 +130,16 @@ class Player {
       // play current animation; stop other animations
       this.toggleAnimation(key, { isPlaying: key === anim })
     })
+  }
+
+  // TODO: Find fix to avoid sliding in case of gentle slopes
+  fallFromGravity () {
+    // exit if model hasn't been loaded yet
+    if (!this.mesh) {
+      return
+    }
+
+    this.mesh.moveWithCollisions(new Vector3(0, -9.8 * WALK_SPEED_FACTOR, 0))
   }
 
   checkForCollisions () {
@@ -143,7 +160,8 @@ class Player {
   }
 
   movePlayer () {
-    this.mesh.translate(new Vector3(this.dirX, 0, this.dirY).normalize(), WALK_SPEED, Space.WORLD)
+    const vector = new Vector3(this.dirX, 0, this.dirY).normalize()
+    this.mesh.moveWithCollisions(new Vector3(vector.x * WALK_SPEED_FACTOR, -9.8 * WALK_SPEED_FACTOR, vector.z * WALK_SPEED_FACTOR))
     this.mesh.rotation = new Vector3(0, Math.atan2(this.dirY, -this.dirX) + Math.PI / 2, 0)
   }
 }
