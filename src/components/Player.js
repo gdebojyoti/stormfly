@@ -8,6 +8,7 @@ import Messenger from './Messenger'
 
 const DEFAULT_ANIMATION = 'idle'
 const WALK_SPEED_FACTOR = 0.05
+const GRAVITY_FACTOR = -9.8
 
 class Player {
   constructor (scene, data) {
@@ -132,14 +133,16 @@ class Player {
     })
   }
 
+  // player falls down when unobstructed (i.e., when no ground underneath)
   // TODO: Find fix to avoid sliding in case of gentle slopes
+  // TODO: Find a better place for this functionality
   fallFromGravity () {
     // exit if model hasn't been loaded yet
     if (!this.mesh) {
       return
     }
 
-    this.mesh.moveWithCollisions(new Vector3(0, -9.8 * WALK_SPEED_FACTOR, 0))
+    this.mesh.moveWithCollisions(new Vector3(0, GRAVITY_FACTOR * WALK_SPEED_FACTOR, 0))
   }
 
   checkForCollisions () {
@@ -161,7 +164,7 @@ class Player {
 
   movePlayer () {
     const vector = new Vector3(this.dirX, 0, this.dirY).normalize()
-    this.mesh.moveWithCollisions(new Vector3(vector.x * WALK_SPEED_FACTOR, -9.8 * WALK_SPEED_FACTOR, vector.z * WALK_SPEED_FACTOR))
+    this.mesh.moveWithCollisions(new Vector3(vector.x * WALK_SPEED_FACTOR, GRAVITY_FACTOR * WALK_SPEED_FACTOR, vector.z * WALK_SPEED_FACTOR))
     this.mesh.rotation = new Vector3(0, Math.atan2(this.dirY, -this.dirX) + Math.PI / 2, 0)
   }
 }
