@@ -1,10 +1,12 @@
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader'
+import { Ray } from '@babylonjs/core/Culling/ray'
 import { Vector3 } from '@babylonjs/core/Maths/math'
 
 import '@babylonjs/loaders/glTF' // OBJ loader
 
 import Controls from 'utilities/Controls'
 import Messenger from './Messenger'
+import Ui from './Ui'
 
 const DEFAULT_ANIMATION = 'idle'
 const WALK_SPEED_FACTOR = 0.05
@@ -16,6 +18,8 @@ class Player {
   }
 
   initialize (scene, { canvas, colliders = [] } = {}) {
+    this._scene = scene
+
     this.isWalking = false // player is idle by default
     this.currentAnimation = DEFAULT_ANIMATION
     this.animations = {
@@ -107,16 +111,14 @@ class Player {
 
   // this method runs every frame
   update () {
-    // // do stuff if colliding
-    // const checkForCollisions = this.checkForCollisions()
-    // console.log('checkForCollisions', checkForCollisions)
+    this.collisionOps()
 
     let anim = DEFAULT_ANIMATION
     if (this.dirX || this.dirY) {
       anim = 'run'
       this.movePlayer()
     } else {
-      this.fallFromGravity()
+      this.gravityOps()
     }
 
     // exit if current animation remains unchanged
@@ -134,6 +136,63 @@ class Player {
     })
   }
 
+  // do stuff if colliding
+  collisionOps () {
+    const collidedObject = this.checkForCollisions() || {}
+    if (collidedObject.id) {
+      Ui.triggerByCollision('PLAYER', collidedObject.id)
+    } else {
+      Ui.triggerByCollision('PLAYER')
+    }
+  }
+
+  checkForCollisions () {
+    // return false if model hasn't been loaded yet
+    if (!this.mesh) {
+      return null
+    }
+
+    // return this.colliders.some(collider => this.mesh.intersectsMesh(collider))
+    let collidedObject = null
+
+    this.colliders.forEach(collider => {
+      if (this.mesh.intersectsMesh(collider)) {
+        collidedObject = collider
+      }
+    })
+
+    return collidedObject
+  }
+
+  // cause player to fall if no ground is detected underneath
+  gravityOps () {
+    console.log('detecting...', this.detectGround())
+    if (!this.detectGround()) {
+      this.fallFromGravity()
+    }
+  }
+
+  // detect if there is a ground (with slope < 10 degrees) underneath player
+  detectGround () {
+    // exit if model hasn't been loaded yet
+    if (!this.mesh) {
+      return
+    }
+
+    const ray = new Ray(this.mesh.position, new Vector3(0, -1, 0), 0.6)
+    const intersectedPoint = this._scene.pickWithRay(ray)
+
+    // intersectedPoint.hit is false if ray did not hit anything
+    if (!intersectedPoint.hit) {
+      return
+    }
+
+    const normal = intersectedPoint.getNormal(true)
+    const gravity = new Vector3(0, 1, 0)
+
+    return (1 - Vector3.Dot(normal, gravity)) * 90
+  }
+
   // player falls down when unobstructed (i.e., when no ground underneath)
   // TODO: Find fix to avoid sliding in case of gentle slopes
   // TODO: Find a better place for this functionality
@@ -144,15 +203,6 @@ class Player {
     }
 
     this.mesh.moveWithCollisions(new Vector3(0, GRAVITY_FACTOR * WALK_SPEED_FACTOR, 0))
-  }
-
-  checkForCollisions () {
-    // return false if model hasn't been loaded yet
-    if (!this.mesh) {
-      return false
-    }
-
-    return this.colliders.some(collider => this.mesh.intersectsMesh(collider))
   }
 
   movePlayer () {
