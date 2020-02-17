@@ -46,7 +46,7 @@ const config = {
 
   devServer: {
     contentBase: buildDirectory,
-    port: 31291
+    port: process.env.PORT || 31291
   },
 
   plugins: [
