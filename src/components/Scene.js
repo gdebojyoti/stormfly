@@ -54,10 +54,45 @@ class Scene {
         tree,
         scene,
         (meshes) => {
+          // TODO: found more efficient way to compute bounding box of imported mesh; or create a helper function
+          const boundingBox = {
+            max: {},
+            min: {},
+            scale: {},
+            center: {}
+          }
+
           // TODO: find a better way of assigning parent to an imported model
-          meshes.forEach(mesh => { mesh.setParent(this.gameObjects.trees[index]) })
+          meshes.forEach((mesh, subindex) => {
+            mesh.setParent(this.gameObjects.trees[index])
+            mesh.showBoundingBox = true
+
+            const meshBoundingBox = mesh.getBoundingInfo().boundingBox
+            const a = ['x', 'y', 'z']
+            const b = ['max', 'min']
+            a.forEach(xyz => {
+              b.forEach(minmax => {
+                const c = minmax === 'min' ? 'minimumWorld' : 'maximumWorld'
+                boundingBox[minmax][xyz] = boundingBox[minmax][xyz] === undefined ? meshBoundingBox[c][xyz] : Math[minmax](meshBoundingBox[c][xyz], boundingBox[minmax][xyz])
+                xyz === 'y' && console.log('meshBoundingBox[c][xyz]', meshBoundingBox.maximumWorld.y)
+              })
+              boundingBox.scale[xyz] = boundingBox.max[xyz] - boundingBox.min[xyz]
+              boundingBox.center[xyz] = (boundingBox.max[xyz] + boundingBox.min[xyz]) / 2
+            })
+          })
+
+          // create a box collider for the final bounding box; add collisions; make it translucent (for debugging)
+          const colliderMesh = Mesh.CreateBox(`tree-collider-${index}`)
+          colliderMesh.scaling = new Vector3(boundingBox.scale.x, boundingBox.scale.y, boundingBox.scale.z)
+          colliderMesh.position = new Vector3(boundingBox.center.x, boundingBox.center.y, boundingBox.center.z)
+          colliderMesh.setParent(this.gameObjects.trees[index])
+          colliderMesh.checkCollisions = true
+          colliderMesh.visibility = 0.4
+
           this.gameObjects.trees[index].position.x = -Math.floor(index % (rowCount)) * 7
           this.gameObjects.trees[index].position.z = -Math.floor(index / (rowCount)) * 7
+
+          this.gameObjects.trees[index].scaling = new Vector3(0.3, 0.3, 0.3)
 
           this.gameObjects.trees[index].data = {
             rotationFactor: Math.random() * (index % 2 === 0 ? 1 : -1) // alternate clockwise & anti-clockwise rotations; randomize rotation speed
