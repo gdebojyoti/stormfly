@@ -164,20 +164,19 @@ class Player {
     return collidedObject
   }
 
-  // cause player to fall if no ground is detected underneath, or if slope is too steep (> 10 degrees)
+  // cause player to fall if no ground is detected underneath
   gravityOps () {
-    const angleWithGround = this.detectAngleWithGround()
-    console.log('detecting...', angleWithGround)
-    if (!angleWithGround || angleWithGround > 10) {
+    console.log('detecting...', this.detectGround())
+    if (!this.detectGround()) {
       this.fallFromGravity()
     }
   }
 
   // detect if there is a ground (with slope < 10 degrees) underneath player
-  detectAngleWithGround () {
+  detectGround () {
     // exit if model hasn't been loaded yet
     if (!this.mesh) {
-      return null
+      return
     }
 
     const ray = new Ray(this.mesh.position, new Vector3(0, -1, 0), 0.6)
@@ -185,13 +184,14 @@ class Player {
 
     // intersectedPoint.hit is false if ray did not hit anything
     if (!intersectedPoint.hit) {
-      return null
+      return
     }
 
     const normal = intersectedPoint.getNormal(true)
     const gravity = new Vector3(0, 1, 0)
 
-    return Math.round(Math.acos(Vector3.Dot(normal, gravity)) * 180 / Math.PI)
+    const angle = Math.round(Math.acos(Vector3.Dot(normal, gravity)) * 180 / Math.PI)
+    return angle < 10
   }
 
   // player falls down when unobstructed (i.e., when no ground underneath)
