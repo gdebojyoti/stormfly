@@ -1,4 +1,4 @@
-import CANNON from 'cannon'
+// import CANNON from 'cannon'
 import { Engine } from '@babylonjs/core/Engines/engine'
 import { Scene } from '@babylonjs/core/scene'
 import { DebugLayer } from '@babylonjs/core/Debug/debugLayer'
@@ -7,7 +7,7 @@ import { FreeCamera } from '@babylonjs/core/Cameras/freeCamera'
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
-import { PhysicsImpostor } from '@babylonjs/core/Physics/physicsImpostor'
+// import { PhysicsImpostor } from '@babylonjs/core/Physics/physicsImpostor'
 
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
 import '@babylonjs/inspector'
@@ -19,7 +19,7 @@ import { getSearchParam } from 'utilities'
 
 import 'stylesheets/main.css'
 
-window.CANNON = CANNON
+// window.CANNON = CANNON
 
 class Game {
   static initialize () {
@@ -48,8 +48,8 @@ class Game {
   }
 
   initializeScene () {
-    const gravityVector = new Vector3(0, -9.81, 0)
-    this.scene.enablePhysics(gravityVector)
+    // const gravityVector = new Vector3(0, -9.81, 0)
+    // this.scene.enablePhysics(gravityVector)
     SceneAssets.initialize(this.scene, this.camera)
   }
 
@@ -96,7 +96,7 @@ class Game {
     ground.enableEdgesRendering(10)
     ground.rotate(Axis.X, Math.PI / 180)
     ground.checkCollisions = true // don't allow player to walk through
-    ground.physicsImpostor = new PhysicsImpostor(ground, PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, this.scene) // 0 mass makes object immovable
+    // ground.physicsImpostor = new PhysicsImpostor(ground, PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, this.scene) // 0 mass makes object immovable
 
     return [cube1, cube2, ground]
   }
