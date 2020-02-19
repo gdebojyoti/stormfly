@@ -1,8 +1,10 @@
 import { Mesh } from '@babylonjs/core/Meshes/mesh'
+import { VertexBuffer } from '@babylonjs/core/Meshes/buffer'
+import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData'
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader'
 import { Vector3, Matrix, Axis } from '@babylonjs/core/Maths/math'
 
-const total = 360
+const total = 0
 let counter = 0 // to keep track of number of trees loaded
 
 class Scene {
@@ -10,6 +12,11 @@ class Scene {
   static initialize (scene, camera) {
     this.scene = scene
     this.camera = camera
+
+    this.gameObjects = {
+      trees: [],
+      lego: null
+    }
   }
 
   // world coordinates to screen coordinates
@@ -30,13 +37,43 @@ class Scene {
     }
   }
 
+  static addLegoModel (scene) {
+    SceneLoader.ImportMesh(
+      null,
+      'assets/models/lego/',
+      'lego.obj',
+      scene,
+      (meshes) => {
+        this.gameObjects.lego = new Mesh('lego', scene)
+
+        meshes.forEach((mesh, subindex) => {
+          const positions = mesh.getVerticesData(VertexBuffer.PositionKind)
+          const normals = new Float32Array(positions.length)
+          VertexData.ComputeNormals(positions, mesh.getIndices(), normals)
+
+          mesh.setVerticesData(VertexBuffer.NormalKind, normals)
+
+          mesh.setParent(this.gameObjects.lego)
+          mesh.showBoundingBox = true
+          mesh.receiveShadows = true
+        })
+
+        this.gameObjects.lego.position.x = 3
+        this.gameObjects.lego.position.z = 3
+        this.gameObjects.lego.rotation.y = Math.PI
+        this.gameObjects.lego.scaling = new Vector3(0.1, 0.1, 0.1)
+
+        console.info('Lego model has been loaded', meshes)
+      },
+      // on progress handler
+      progress => {}
+    )
+  }
+
   // add 120 instances each of 3 different tree models
   static addDemoTrees (scene) {
     const assets = {
       trees: new Array(total / 3).fill(['TreePine1.glb', 'TreePine2.glb', 'TreePine3.glb']).flat()
-    }
-    this.gameObjects = {
-      trees: []
     }
 
     console.info(`Loading ${total} trees...`)
@@ -119,6 +156,8 @@ class Scene {
     this.gameObjects.trees.forEach((tree, index) => {
       tree.data && tree.rotate(Axis.Y, tree.data.rotationFactor * Math.PI / 150)
     })
+
+    this.gameObjects.lego && this.gameObjects.lego.rotate(Axis.Y, Math.PI / 150)
   }
 }
 

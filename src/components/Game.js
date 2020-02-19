@@ -42,7 +42,7 @@ class Game {
     self.initializeLights()
     const basicAssets = self.initializeBasicAssets()
     self.addPlayers(canvas, basicAssets)
-    // self.addMoreAssets()
+    self.addMoreAssets()
     self.subscribeToMessages()
     self.update(engine)
   }
@@ -60,7 +60,7 @@ class Game {
   }
 
   initializeLights () {
-    const light = new DirectionalLight('light1', new Vector3(-1, -1, 0), this.scene)
+    const light = new DirectionalLight('light1', new Vector3(0.5, -0.9, 1), this.scene)
     light.intensity = 1.5
     window.light = light // NOTE: make light a global object; temporary
   }
@@ -107,6 +107,7 @@ class Game {
 
   addMoreAssets () {
     SceneAssets.addDemoTrees(this.scene)
+    SceneAssets.addLegoModel(this.scene)
   }
 
   subscribeToMessages () {
