@@ -1,3 +1,4 @@
+const glob = require('glob')
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
@@ -6,8 +7,20 @@ const sourceDirectory = path.resolve(__dirname, '../src')
 const buildDirectory = path.resolve(__dirname, '../build')
 const publicDirectory = path.resolve(__dirname, '../public')
 
+const generateHTML = () => glob.sync(`${sourceDirectory}/pages/*.html`).map(
+  dir => new HtmlWebpackPlugin({
+    hash: false,
+    filename: path.basename(dir),
+    template: dir,
+    chunks: ['vendors', path.basename(dir).split('.')[0]]
+  })
+)
+
 const config = {
-  entry: path.resolve(sourceDirectory, 'app.js'),
+  entry: {
+    index: path.resolve(sourceDirectory, 'app.js'),
+    editor: path.resolve(sourceDirectory, 'editor.js')
+  },
 
   output: {
     path: publicDirectory,
@@ -50,12 +63,7 @@ const config = {
   },
 
   plugins: [
-    new HtmlWebpackPlugin({
-      hash: false,
-      title: 'The Phaser App',
-      template: sourceDirectory + '/index.html',
-      filename: 'index.html' // relative to root of the application
-    }),
+    ...generateHTML(),
     new CopyPlugin([
       { from: sourceDirectory + '/assets', to: publicDirectory + '/assets' }
     ])
