@@ -50,6 +50,9 @@ const config = {
   resolve: {
     extensions: ['.js'],
     alias: {
+      react: 'preact/compat',
+      'react-dom': 'preact/compat',
+
       assets: path.resolve(sourceDirectory, 'assets'),
       stylesheets: path.resolve(sourceDirectory, 'stylesheets'),
       components: path.resolve(sourceDirectory, 'components'),
@@ -70,7 +73,7 @@ const config = {
   ],
 
   optimization: {
-    minimize: false,
+    // minimize: false,
     splitChunks: {
       cacheGroups: {
         vendors: {

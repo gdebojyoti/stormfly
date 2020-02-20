@@ -1,0 +1,14 @@
+.ui {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 100%;
+  background-color: #0001;
+  backdrop-filter: blur(5px);
+  /* pointer-events: none; */
+}
+
+.label {
+  color: #fff;
+}
