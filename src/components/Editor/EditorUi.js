@@ -1,26 +1,27 @@
 /** @jsx h */
-import { h, render } from 'preact'
-import { useEffect, useState } from 'react'
+import { h } from 'preact'
+import { useEffect, useState, useImperativeHandle, forwardRef } from 'react'
 
 import SceneManager from './SceneManager'
+import Utils from './Utils'
 
 const models = ['TreePine1.glb', 'TreePine2.glb', 'TreePine3.glb']
 
-const EditorUi = () => {
+const EditorUi = forwardRef((props, ref) => {
   useEffect(() => {
-    // Trigger your effect
     SceneManager.initialize(models)
-    return () => {
-      // Optional: Any cleanup code
-    }
   }, [])
+
+  useImperativeHandle(ref, () => ({
+    canvasClick: SceneManager.onClick.bind(SceneManager),
+    onKeyDown: SceneManager.onKeyDown.bind(SceneManager)
+  }))
 
   const [selectedModel, setSelectedModel] = useState('') // asset currently selected in panel
 
   const onAssetSelect = model => {
-    console.log('asset selected:', model)
     setSelectedModel(model)
-    SceneManager.loadModel(model)
+    SceneManager.loadModel(model, Utils.addModel)
   }
 
   return (
@@ -38,8 +39,6 @@ const EditorUi = () => {
       })}
     </div>
   )
-}
-
-render(<EditorUi />, document.body)
+})
 
 export default EditorUi
