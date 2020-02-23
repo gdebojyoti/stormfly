@@ -4,12 +4,13 @@ import { useEffect, useState, useImperativeHandle, forwardRef } from 'react'
 
 import SceneManager from './SceneManager'
 import Utils from './Utils'
+import { getFromLocalStorage, downloadLevelJson, viewLevelJson } from 'utilities'
 
 const models = ['TreePine1.glb', 'TreePine2.glb', 'TreePine3.glb']
 
 const EditorUi = forwardRef((props, ref) => {
   useEffect(() => {
-    SceneManager.initialize(models)
+    SceneManager.initialize(getFromLocalStorage('levelData'))
   }, [])
 
   useImperativeHandle(ref, () => ({
@@ -37,6 +38,9 @@ const EditorUi = forwardRef((props, ref) => {
           </button>
         )
       })}
+      <br />
+      <button onClick={downloadLevelJson}>Download JSON</button>
+      <button onClick={viewLevelJson}>View JSON</button>
     </div>
   )
 })

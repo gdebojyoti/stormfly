@@ -13,8 +13,7 @@ import '@babylonjs/inspector'
 import Utils from './Utils'
 
 class SceneManager {
-  static initialize (models) {
-    console.log('initializing scene manager...', models)
+  static initialize (levelData) {
     const canvas = document.getElementById('editor')
     canvas.focus()
     const engine = new Engine(canvas)
@@ -25,11 +24,30 @@ class SceneManager {
     this.initializeLights()
     this.initializeBasicAssets()
     this.initializGizmos()
+    this.loadAssetsFromLevel(levelData)
 
     this.update(engine)
 
     this.currentModel = null // model that is currently visible on hovering over base
     this.isPlacingModel = false // set to true if user is currently placing an asset on base
+  }
+
+  static loadAssetsFromLevel (levelData) {
+    // exit if there is no saved level data
+    if (!levelData) {
+      return
+    }
+
+    const assets = levelData.zone1
+
+    // load every instance of every model
+    assets.forEach(asset => {
+      if (!asset.instances) return
+
+      asset.instances.forEach(instance => {
+        this.loadModel(asset.modelId, null, instance)
+      })
+    })
   }
 
   static initializGizmos () {
@@ -172,20 +190,21 @@ class SceneManager {
     }
   }
 
-  static loadModel (model, onModelLoad) {
+  // load model; existingModel = details of model that needs to be preloaded for existing map data
+  static loadModel (model, onModelLoad, existingModel) {
     SceneLoader.ImportMesh(
       null,
       'assets/models/',
       model,
       this.scene,
       (meshes) => {
-        this.currentModel = this.processModel(meshes, model)
-        this.isPlacing = true
+        this.currentModel = this.processModel(meshes, model, existingModel)
+        this.isPlacing = !existingModel
 
         // add model to list of gizmo enabled meshes
         this.gizmoManager.attachableMeshes.push(this.currentModel)
 
-        onModelLoad(model, this.currentModel)
+        onModelLoad && onModelLoad(model, this.currentModel)
       }
     )
   }
@@ -201,9 +220,9 @@ class SceneManager {
   }
 
   // set parent and apply colliders to imported model
-  static processModel (meshes, modelName) {
+  static processModel (meshes, modelName, existingModel) {
     const modelId = modelName.split('.')[0]
-    const identifier = `dg-${modelId}-${new Date().getTime()}`
+    const identifier = existingModel ? existingModel.id : `dg-${modelId}-${new Date().getTime()}`
     const parentGo = new Mesh(identifier)
 
     const boundingBox = {
@@ -239,11 +258,19 @@ class SceneManager {
     colliderMesh.checkCollisions = true
     colliderMesh.visibility = 0.4
 
-    parentGo.scaling = new Vector3(0.1, 0.1, 0.1)
-
     parentGo.data = {
       modelId: modelName
     }
+
+    if (existingModel) {
+      parentGo.position = new Vector3(existingModel.position.x, existingModel.position.y, existingModel.position.z)
+      parentGo.rotation = new Vector3(existingModel.rotation.x, existingModel.rotation.y, existingModel.rotation.z)
+      parentGo.scaling = new Vector3(existingModel.scale.x, existingModel.scale.y, existingModel.scale.z)
+
+      return parentGo
+    }
+
+    parentGo.scaling = new Vector3(0.1, 0.1, 0.1)
 
     return parentGo
   }

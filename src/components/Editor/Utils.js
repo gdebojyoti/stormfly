@@ -1,9 +1,14 @@
-const levelData = {
+import { saveToLocalStorage, getFromLocalStorage } from 'utilities'
+
+const defaultLevelData = {
+  v: 0, // version details
   zone1: []
 }
 
 class Utils {
   static addModel (modelId, mesh) {
+    const levelData = getFromLocalStorage('levelData') || defaultLevelData
+
     // check entry for modelId in level data
     const entry = levelData.zone1.find(model => model && model.modelId === modelId)
 
@@ -48,6 +53,7 @@ class Utils {
       entry.instances.push(instanceData)
     }
 
+    saveToLocalStorage('levelData', levelData)
     console.info('Model added. New level data:', levelData)
   }
 
@@ -58,6 +64,8 @@ class Utils {
     if (!modelId) {
       return
     }
+
+    const levelData = getFromLocalStorage('levelData') || defaultLevelData
 
     // check entry for modelId in level data
     const entry = levelData.zone1.find(model => model && model.modelId === modelId)
@@ -98,6 +106,7 @@ class Utils {
       }
     }
 
+    saveToLocalStorage('levelData', levelData)
     console.info('Model updated. New level data:', mesh.position.x, levelData)
   }
 }
