@@ -4,7 +4,7 @@ import { useEffect, useState, useImperativeHandle, forwardRef } from 'react'
 
 import SceneManager from './SceneManager'
 import Utils from './Utils'
-import { getFromLocalStorage, downloadLevelJson, viewLevelJson } from 'utilities'
+import { getFromLocalStorage } from 'utilities'
 
 const models = ['TreePine1.glb', 'TreePine2.glb', 'TreePine3.glb']
 
@@ -39,8 +39,11 @@ const Ui = forwardRef((props, ref) => {
         )
       })}
       <br />
-      <button onClick={downloadLevelJson}>Download JSON</button>
-      <button onClick={viewLevelJson}>View JSON</button>
+
+      {/* eslint-disable react/jsx-handler-names */}
+      <button onClick={Utils.downloadLevelJson}>Download JSON</button>
+      <button onClick={Utils.viewLevelJson}>View JSON</button>
+      {/* eslint-enable react/jsx-handler-names */}
     </div>
   )
 })

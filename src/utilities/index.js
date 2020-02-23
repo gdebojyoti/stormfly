@@ -43,39 +43,3 @@ export function getFromLocalStorage (key) {
     return data
   }
 }
-
-export function viewLevelJson () {
-  const levelData = getFromLocalStorage('levelData')
-  if (!levelData) {
-    window.alert('No level data found in browser\'s local storage')
-    return
-  }
-
-  var levelDataJson = JSON.stringify(levelData, null, 2)
-  console.info('Level data:', levelDataJson)
-  var x = window.open()
-  x.document.open()
-  x.document.write('<html><body><pre>' + levelDataJson + '</pre></body></html>')
-  x.document.close()
-
-  // TODO: get below statement to work
-  // window.open('data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(levelData)))
-}
-
-export function downloadLevelJson () {
-  const levelData = getFromLocalStorage('levelData')
-  if (!levelData) {
-    window.alert('No level data found in browser\'s local storage')
-    return
-  }
-
-  const levelDataJson = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(levelData))
-  const elm = document.createElement('a')
-  elm.setAttribute('href', levelDataJson)
-  elm.setAttribute('download', 'levelData.json')
-  document.body.appendChild(elm) // required for firefox
-  elm.click()
-  elm.remove()
-
-  console.info('Downloading level data in JSON format...')
-}
