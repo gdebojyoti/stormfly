@@ -16,3 +16,30 @@ export function getSearchParam (param) {
 
   return value
 }
+
+export function saveToLocalStorage (key, value) {
+  const ls = window.localStorage
+  if (!ls) {
+    console.error('You are using a browser that does not support Local Storage!')
+    return
+  }
+  if (typeof value === 'object') {
+    ls.setItem(key, JSON.stringify(value))
+  } else {
+    ls.setItem(key, value)
+  }
+}
+
+export function getFromLocalStorage (key) {
+  const ls = window.localStorage
+  if (!ls) {
+    console.error('You are using a browser that does not support Local Storage!')
+    return
+  }
+  const data = ls.getItem(key)
+  try {
+    return JSON.parse(data)
+  } catch (e) {
+    return data
+  }
+}

@@ -5,8 +5,8 @@ import { Vector3 } from '@babylonjs/core/Maths/math'
 import '@babylonjs/loaders/glTF' // OBJ loader
 
 import Controls from 'utilities/Controls'
-import Messenger from './Messenger'
-import Ui from './Ui'
+import Messenger from 'components/Messenger'
+import Ui from 'components/Ui'
 
 const DEFAULT_ANIMATION = 'idle'
 const WALK_SPEED_FACTOR = 0.05

@@ -12,7 +12,7 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 import '@babylonjs/core/Meshes/meshBuilder' // allow Mesh to create default shapes (sphere, ground)
 import '@babylonjs/inspector'
 
-import Messenger from './Messenger'
+import Messenger from 'components/Messenger'
 import Player from './Player'
 import SceneAssets from './Scene'
 import { getSearchParam } from 'utilities'
