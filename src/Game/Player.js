@@ -141,6 +141,9 @@ class Player {
     const collidedObject = this.checkForCollisions() || {}
     if (collidedObject.id) {
       Ui.triggerByCollision('PLAYER', collidedObject.id)
+      if (collidedObject.data && collidedObject.data.onCollide) {
+        collidedObject.data.onCollide()
+      }
     } else {
       Ui.triggerByCollision('PLAYER')
     }
@@ -166,7 +169,6 @@ class Player {
 
   // cause player to fall if no ground is detected underneath
   gravityOps () {
-    console.log('detecting...', this.detectGround())
     if (!this.detectGround()) {
       this.fallFromGravity()
     }

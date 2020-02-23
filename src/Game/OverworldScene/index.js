@@ -73,6 +73,11 @@ class OverworldScene {
     cube2.checkCollisions = true
     cube2.rotation.y = Math.PI / 4
     cube2.showBoundingBox = true
+    cube1.data = {
+      onCollide: () => {
+        Messenger.publish('CHANGE_SCENE', 'FIGHT_SCENE')
+      }
+    }
 
     // ground with slight tilt; indicative of real world terrain
     const ground = Mesh.CreateGround('ground1', 16, 16, 50) // Params: name, width, depth, subdivs, scene
