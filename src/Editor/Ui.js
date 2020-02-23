@@ -8,7 +8,7 @@ import { getFromLocalStorage, downloadLevelJson, viewLevelJson } from 'utilities
 
 const models = ['TreePine1.glb', 'TreePine2.glb', 'TreePine3.glb']
 
-const EditorUi = forwardRef((props, ref) => {
+const Ui = forwardRef((props, ref) => {
   useEffect(() => {
     SceneManager.initialize(getFromLocalStorage('levelData'))
   }, [])
@@ -45,4 +45,4 @@ const EditorUi = forwardRef((props, ref) => {
   )
 })
 
-export default EditorUi
+export default Ui

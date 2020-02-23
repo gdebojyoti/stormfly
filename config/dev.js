@@ -56,7 +56,10 @@ const config = {
       assets: path.resolve(sourceDirectory, 'assets'),
       stylesheets: path.resolve(sourceDirectory, 'stylesheets'),
       components: path.resolve(sourceDirectory, 'components'),
-      utilities: path.resolve(sourceDirectory, 'utilities')
+      utilities: path.resolve(sourceDirectory, 'utilities'),
+
+      Game: path.resolve(sourceDirectory, 'Game'),
+      Editor: path.resolve(sourceDirectory, 'Editor')
     }
   },
 

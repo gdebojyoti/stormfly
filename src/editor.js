@@ -2,7 +2,7 @@
 import { h, render } from 'preact'
 import React, { useRef } from 'react'
 
-import EditorUi from 'components/Editor/EditorUi'
+import EditorUi from 'Editor/Ui'
 
 import 'stylesheets/main.css'
 import 'stylesheets/editor.css'
