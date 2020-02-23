@@ -32,54 +32,6 @@ class SceneManager {
     this.isPlacingModel = false // set to true if user is currently placing an asset on base
   }
 
-  static loadAssetsFromLevel (levelData) {
-    // exit if there is no saved level data
-    if (!levelData) {
-      return
-    }
-
-    const assets = levelData.zone1
-
-    // load every instance of every model
-    assets.forEach(asset => {
-      if (!asset.instances) return
-
-      asset.instances.forEach(instance => {
-        this.loadModel(asset.modelId, null, instance)
-      })
-    })
-  }
-
-  static initializGizmos () {
-    this.gizmoManager = new GizmoManager(this.scene)
-
-    // set all to true in order to implement onDragEndObservable methods
-    this.gizmoManager.positionGizmoEnabled = true
-    this.gizmoManager.rotationGizmoEnabled = true
-    this.gizmoManager.scaleGizmoEnabled = true
-
-    this.gizmoManager.attachableMeshes = []
-
-    const gizmos = this.gizmoManager.gizmos
-    // gizmos.positionGizmo.snapDistance = 0.1
-    gizmos.positionGizmo.onDragEndObservable.add(() => {
-      console.log('Dragged', gizmos.positionGizmo.attachedMesh)
-      Utils.updateModel(gizmos.positionGizmo.attachedMesh)
-    })
-    gizmos.rotationGizmo.onDragEndObservable.add(() => {
-      console.log('rotated', gizmos.rotationGizmo.attachedMesh)
-      Utils.updateModel(gizmos.rotationGizmo.attachedMesh)
-    })
-    gizmos.scaleGizmo.onDragEndObservable.add(() => {
-      console.log('scaled', gizmos.scaleGizmo.attachedMesh)
-      Utils.updateModel(gizmos.scaleGizmo.attachedMesh)
-    })
-
-    // only position gizmo should be enabled by default
-    this.gizmoManager.rotationGizmoEnabled = false
-    this.gizmoManager.scaleGizmoEnabled = false
-  }
-
   static initializeCamera (canvas) {
     this.camera = new FreeCamera('camera1', new Vector3(-5, 4, -5), this.scene)
     this.camera.setTarget(Vector3.Zero()) // target camera towards scene origin
@@ -114,6 +66,54 @@ class SceneManager {
     base.enableEdgesRendering(10)
   }
 
+  static initializGizmos () {
+    this.gizmoManager = new GizmoManager(this.scene)
+
+    // set all to true in order to implement onDragEndObservable methods
+    this.gizmoManager.positionGizmoEnabled = true
+    this.gizmoManager.rotationGizmoEnabled = true
+    this.gizmoManager.scaleGizmoEnabled = true
+
+    this.gizmoManager.attachableMeshes = []
+
+    const gizmos = this.gizmoManager.gizmos
+    // gizmos.positionGizmo.snapDistance = 0.1
+    gizmos.positionGizmo.onDragEndObservable.add(() => {
+      console.log('Dragged', gizmos.positionGizmo.attachedMesh)
+      Utils.updateModel(gizmos.positionGizmo.attachedMesh)
+    })
+    gizmos.rotationGizmo.onDragEndObservable.add(() => {
+      console.log('rotated', gizmos.rotationGizmo.attachedMesh)
+      Utils.updateModel(gizmos.rotationGizmo.attachedMesh)
+    })
+    gizmos.scaleGizmo.onDragEndObservable.add(() => {
+      console.log('scaled', gizmos.scaleGizmo.attachedMesh)
+      Utils.updateModel(gizmos.scaleGizmo.attachedMesh)
+    })
+
+    // only position gizmo should be enabled by default
+    this.gizmoManager.rotationGizmoEnabled = false
+    this.gizmoManager.scaleGizmoEnabled = false
+  }
+
+  static loadAssetsFromLevel (levelData) {
+    // exit if there is no saved level data
+    if (!levelData) {
+      return
+    }
+
+    const assets = levelData.zone1
+
+    // load every instance of every model
+    assets.forEach(asset => {
+      if (!asset.instances) return
+
+      asset.instances.forEach(instance => {
+        this.loadModel(asset.modelId, null, instance)
+      })
+    })
+  }
+
   static update (engine) {
     engine.runRenderLoop(() => {
       this.scene.render()
@@ -140,6 +140,72 @@ class SceneManager {
     }
 
     return info.pickedPoint
+  }
+
+  // set gizmo controls to affect position, rotation or scale
+  static modifyGizmoControls ({ position, rotation, scale }) {
+    // exit if in placing mode
+    if (this.isPlacing) return
+
+    this.gizmoManager.positionGizmoEnabled = !!position
+    this.gizmoManager.rotationGizmoEnabled = !!rotation
+    this.gizmoManager.scaleGizmoEnabled = !!scale
+  }
+
+  // set parent and apply colliders to imported model
+  static processModel (meshes, modelName, existingModel) {
+    const modelId = modelName.split('.')[0]
+    const identifier = existingModel ? existingModel.id : `dg-${modelId}-${new Date().getTime()}`
+    const parentGo = new Mesh(identifier)
+
+    const boundingBox = {
+      max: {},
+      min: {},
+      scale: {},
+      center: {}
+    }
+
+    meshes.forEach((mesh, subindex) => {
+      mesh.setParent(parentGo)
+      mesh.showBoundingBox = true
+      mesh.receiveShadows = true
+
+      const meshBoundingBox = mesh.getBoundingInfo().boundingBox
+      const a = ['x', 'y', 'z']
+      const b = ['max', 'min']
+      a.forEach(xyz => {
+        b.forEach(minmax => {
+          const c = minmax === 'min' ? 'minimumWorld' : 'maximumWorld'
+          boundingBox[minmax][xyz] = boundingBox[minmax][xyz] === undefined ? meshBoundingBox[c][xyz] : Math[minmax](meshBoundingBox[c][xyz], boundingBox[minmax][xyz])
+          xyz === 'y' && console.log('meshBoundingBox[c][xyz]', meshBoundingBox.maximumWorld.y)
+        })
+        boundingBox.scale[xyz] = boundingBox.max[xyz] - boundingBox.min[xyz]
+        boundingBox.center[xyz] = (boundingBox.max[xyz] + boundingBox.min[xyz]) / 2
+      })
+    })
+
+    const colliderMesh = Mesh.CreateBox(`${identifier}-collider`)
+    colliderMesh.scaling = new Vector3(boundingBox.scale.x, boundingBox.scale.y, boundingBox.scale.z)
+    colliderMesh.position = new Vector3(boundingBox.center.x, boundingBox.center.y, boundingBox.center.z)
+    colliderMesh.setParent(parentGo)
+    colliderMesh.checkCollisions = true
+    colliderMesh.visibility = 0.4
+
+    parentGo.data = {
+      modelId: modelName
+    }
+
+    if (existingModel) {
+      parentGo.position = new Vector3(existingModel.position.x, existingModel.position.y, existingModel.position.z)
+      parentGo.rotation = new Vector3(existingModel.rotation.x, existingModel.rotation.y, existingModel.rotation.z)
+      parentGo.scaling = new Vector3(existingModel.scale.x, existingModel.scale.y, existingModel.scale.z)
+
+      return parentGo
+    }
+
+    parentGo.scaling = new Vector3(0.1, 0.1, 0.1)
+
+    return parentGo
   }
 
   /* public methods */
@@ -207,72 +273,6 @@ class SceneManager {
         onModelLoad && onModelLoad(model, this.currentModel)
       }
     )
-  }
-
-  // set gizmo controls to affect position, rotation or scale
-  static modifyGizmoControls ({ position, rotation, scale }) {
-    // exit if in placing mode
-    if (this.isPlacing) return
-
-    this.gizmoManager.positionGizmoEnabled = !!position
-    this.gizmoManager.rotationGizmoEnabled = !!rotation
-    this.gizmoManager.scaleGizmoEnabled = !!scale
-  }
-
-  // set parent and apply colliders to imported model
-  static processModel (meshes, modelName, existingModel) {
-    const modelId = modelName.split('.')[0]
-    const identifier = existingModel ? existingModel.id : `dg-${modelId}-${new Date().getTime()}`
-    const parentGo = new Mesh(identifier)
-
-    const boundingBox = {
-      max: {},
-      min: {},
-      scale: {},
-      center: {}
-    }
-
-    meshes.forEach((mesh, subindex) => {
-      mesh.setParent(parentGo)
-      mesh.showBoundingBox = true
-      mesh.receiveShadows = true
-
-      const meshBoundingBox = mesh.getBoundingInfo().boundingBox
-      const a = ['x', 'y', 'z']
-      const b = ['max', 'min']
-      a.forEach(xyz => {
-        b.forEach(minmax => {
-          const c = minmax === 'min' ? 'minimumWorld' : 'maximumWorld'
-          boundingBox[minmax][xyz] = boundingBox[minmax][xyz] === undefined ? meshBoundingBox[c][xyz] : Math[minmax](meshBoundingBox[c][xyz], boundingBox[minmax][xyz])
-          xyz === 'y' && console.log('meshBoundingBox[c][xyz]', meshBoundingBox.maximumWorld.y)
-        })
-        boundingBox.scale[xyz] = boundingBox.max[xyz] - boundingBox.min[xyz]
-        boundingBox.center[xyz] = (boundingBox.max[xyz] + boundingBox.min[xyz]) / 2
-      })
-    })
-
-    const colliderMesh = Mesh.CreateBox(`${identifier}-collider`)
-    colliderMesh.scaling = new Vector3(boundingBox.scale.x, boundingBox.scale.y, boundingBox.scale.z)
-    colliderMesh.position = new Vector3(boundingBox.center.x, boundingBox.center.y, boundingBox.center.z)
-    colliderMesh.setParent(parentGo)
-    colliderMesh.checkCollisions = true
-    colliderMesh.visibility = 0.4
-
-    parentGo.data = {
-      modelId: modelName
-    }
-
-    if (existingModel) {
-      parentGo.position = new Vector3(existingModel.position.x, existingModel.position.y, existingModel.position.z)
-      parentGo.rotation = new Vector3(existingModel.rotation.x, existingModel.rotation.y, existingModel.rotation.z)
-      parentGo.scaling = new Vector3(existingModel.scale.x, existingModel.scale.y, existingModel.scale.z)
-
-      return parentGo
-    }
-
-    parentGo.scaling = new Vector3(0.1, 0.1, 0.1)
-
-    return parentGo
   }
 }
 
