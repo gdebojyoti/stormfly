@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "Pikachu",
+    "types": [],
+    "moves": [],
+    "baseStats": {
+      "hp": 100,
+      "atk": 30,
+      "def": 10,
+      "sta": 70,
+      "crtCnc": 5,
+      "crtDmg": 20
+    },
+    "evolvesAt": 18
+  }
+]

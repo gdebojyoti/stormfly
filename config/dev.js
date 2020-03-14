@@ -19,7 +19,8 @@ const generateHTML = () => glob.sync(`${sourceDirectory}/pages/*.html`).map(
 const config = {
   entry: {
     index: path.resolve(sourceDirectory, 'app.js'),
-    editor: path.resolve(sourceDirectory, 'editor.js')
+    editor: path.resolve(sourceDirectory, 'editor.js'),
+    battle: path.resolve(sourceDirectory, 'battle.js')
   },
 
   output: {
@@ -53,6 +54,7 @@ const config = {
       react: 'preact/compat',
       'react-dom': 'preact/compat',
 
+      data: path.resolve(sourceDirectory, 'data'),
       assets: path.resolve(sourceDirectory, 'assets'),
       stylesheets: path.resolve(sourceDirectory, 'stylesheets'),
       components: path.resolve(sourceDirectory, 'components'),

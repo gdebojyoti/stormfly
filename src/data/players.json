@@ -1,0 +1,31 @@
+[
+  {
+    "id": 0,
+    "username": "",
+    "firstName": "",
+    "lastName": "",
+    "joinedOn": "",
+    "creatures": [
+      {
+        "id": "",
+        "creatureId": 0,
+        "nickName": "",
+        "capturedTimestamp": "",
+        "level": 0,
+        "movesActive": [],
+        "movesUnlocked": [],
+        "stats": {
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "stm": 0
+        }
+      }
+    ],
+    "squad": [],
+    "primary": "",
+    "secondary": "",
+    "wardrobe": {},
+    "inventory": {}
+  }
+]
