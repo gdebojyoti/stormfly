@@ -6,20 +6,33 @@ import FightScene from './FightScene'
 
 import 'stylesheets/main.css'
 
+const scenes = {
+  OVERWORLD_SCENE: OverworldScene,
+  FIGHT_SCENE: FightScene
+}
+
 class Game {
   static initialize () {
-    const canvas = document.getElementById('canvas')
-    const engine = new Engine(canvas)
+    this.canvas = document.getElementById('canvas')
+    this.engine = new Engine(this.canvas)
 
-    OverworldScene.initialize({ engine, canvas })
-    FightScene.initialize({ engine, canvas })
-
-    // set default scene
     this.changeScene('OVERWORLD_SCENE')
 
     this.subscribeToMessages()
 
-    this.update(engine)
+    this.addEventListeners(this.engine)
+
+    this.update(this.engine)
+  }
+
+  static changeScene (scene) {
+    // destroy current scene
+    this.currentScene && this.currentScene.dispose()
+    this.currentScene = null
+
+    const newScene = scenes[scene]
+    newScene.initialize({ engine: this.engine, canvas: this.canvas })
+    this.currentScene = newScene
   }
 
   static subscribeToMessages () {
@@ -37,14 +50,15 @@ class Game {
     }
   }
 
-  static changeScene (scene) {
-    this.currentScene = scene
+  static addEventListeners (engine) {
+    window.addEventListener('resize', function () {
+      engine.resize()
+    })
   }
 
   static update (engine) {
     engine.runRenderLoop(() => {
-      this.currentScene === 'OVERWORLD_SCENE' && OverworldScene.update()
-      this.currentScene === 'FIGHT_SCENE' && FightScene.update()
+      this.currentScene && this.currentScene.update()
     })
   }
 }

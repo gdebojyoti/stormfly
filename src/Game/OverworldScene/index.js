@@ -16,9 +16,13 @@ import SceneAssets from 'Game/Scene'
 import Messenger from 'components/Messenger'
 import Player from 'Game/Player'
 
+// TODO: extend class from a generic scene interface
 class OverworldScene {
   static initialize ({ engine, canvas }) {
     this.scene = new Scene(engine)
+
+    // // testing effects of collisionsEnabled
+    // this.scene.collisionsEnabled = false
 
     // debugging enabled when URL contains 'debug=true'
     const debugLayer = new DebugLayer(this.scene)
@@ -41,6 +45,14 @@ class OverworldScene {
 
   static initializeScene () {
     SceneAssets.initialize(this.scene, this.camera)
+
+    this.scene.onPointerDown = (evt, pickResult) => {
+      console.log('pointer down in overworld scene')
+      // We try to pick an object
+      if (pickResult.hit) {
+        // console.log('pickResult overworld', pickResult, this.scene)
+      }
+    }
   }
 
   static initializeLights () {
@@ -61,23 +73,30 @@ class OverworldScene {
     // cube1 will trigger collided flag
     const cube1 = Mesh.CreateBox('cube1')
     cube1.name = 'Entry point'
-    cube1.position = new Vector3(0, 0.5, -2)
+    cube1.position = new Vector3(0, 0.5, 3)
     cube1.material = material
     cube1.enableEdgesRendering(10)
+    cube1.data = {
+      onCollide: () => {
+        Messenger.publish('CHANGE_SCENE', 'FIGHT_SCENE')
+        console.log('oncollide method of cub1')
+      }
+    }
+    cube1.onCollideObservable.add(() => {
+      console.log('cube 1 hit')
+    })
 
     // player cannot walk through cube2
     const cube2 = Mesh.CreateBox('cube2') // Params: name, subdivs, size (diameter), scene
     cube2.material = material
-    cube2.position = new Vector3(0, 0.5, 3)
+    cube2.position = new Vector3(0, 0.5, -2)
     cube2.renderOutline = true
     cube2.checkCollisions = true
     cube2.rotation.y = Math.PI / 4
     cube2.showBoundingBox = true
-    cube1.data = {
-      onCollide: () => {
-        Messenger.publish('CHANGE_SCENE', 'FIGHT_SCENE')
-      }
-    }
+    cube2.onCollideObservable.add(() => {
+      console.log('cube 2')
+    })
 
     // ground with slight tilt; indicative of real world terrain
     const ground = Mesh.CreateGround('ground1', 16, 16, 50) // Params: name, width, depth, subdivs, scene
@@ -125,6 +144,12 @@ class OverworldScene {
 
     // call predefined render method of self
     this.scene.render()
+  }
+
+  static dispose () {
+    console.log('deleting scene', this.scene)
+    this.scene.dispose()
+    console.log('deleted scene', this.scene)
   }
 }
 
